@@ -198,6 +198,30 @@ Sabrina Ciccolo\\
 \fancyhead[C]{\nouppercase{\leftmark}}
 
 
+\chapter{Introduction}
+\label{ch:intro}
+
+\section{The problem}
+\label{sec:intro-problem}
+
+Industrial handling is increasingly automated. Repetitive and heavy tasks such as lifting or sorting parts, once assigned to human operators, are now delegated to robots to satisfy the cycle time required by the production line.
+
+For a robot to grasp an object, it is necessary to determine the object's pose, which dedicated sensors measure as a position and an orientation relative to the robot's own coordinate frame.
+
+For a single compact piece, one 3D sensor is usually sufficient, as its viewpoint can cover the entire object. On the other hand, a very long part cannot be captured from a single viewpoint, making a single scanner insufficient. The layout therefore requires two sensors, one for each end. The part is gripped precisely at these ends, whose faces also determine the 6D pose of a straight extruded profile up to the symmetry of the cross-section.
+
+The setup consists of two structured-light 3D scanners, positioned at either end of a conveyor carrying bundles of six-metre metal bars of identical profile.
+
+Each device is mounted on a dedicated carriage at one end of the bundle, facing the end faces of the bars rather than their length. The two carriages are separated by several metres along the axis of the bar. The part of the bundle that each scanner covers is often narrower than the bundle itself, so a single view does not always contain every bar. Because the two sensors face opposite ends, their respective viewpoints neither overlap nor capture any common surface. Finally, a dual-arm manipulator picks up each bar by gripping it at both ends. \Cref{fig:rig} illustrates this setup.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/f1_rig.png}
+\caption[Dual-scanner system]{Dual-scanner system. Top view of the system. Each scanner is positioned at one end of the bundle and detects only the end faces of the bars facing it. In the figure, these faces are highlighted at both ends of each bar. The viewpoints of the two scanners do not share any surface and the bundle passes through both. Neither axis is to scale.}
+\label{fig:rig}
+\end{figure}
+
+
 
 %------------------------------------------%
 %-------------- BIBLIOGRAPHY --------------%
