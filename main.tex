@@ -221,6 +221,29 @@ Each device is mounted on a dedicated carriage at one end of the bundle, facing 
 \label{fig:rig}
 \end{figure}
 
+The task is therefore to determine which detection from one scanner and which from the other belong to the same physical object. In this specific case, data association cannot be resolved using conventional techniques due to the absence of typical geometric or visual features.
+
+\textbf{Absence of epipolar constraint.} The lack of overlap between the two views means that the scanners never see the same surface.
+
+\textbf{Visual appearance invariance.} Because the bars originate from the same extrusion batch, end faces belonging to the same profile family (i.e., bars sharing the same cross-section) are identical up to saw marks.
+
+\textbf{Relative position invariance.} The bars are packed edge to edge at an almost uniform pitch, so the scanner detects a sequence of end faces that remains visually invariant even if the bundle shifts by one position.
+
+\textbf{Conveyor motion between acquisitions.} Because the conveyor belt advances between the two acquisitions, the two scan windows can cut the bundle at different bars, in which case an association that pairs the detections in their order is shifted by one or more bars.
+
+This shift ambiguity is illustrated in \cref{fig:aliasing}. In each view, a different end bar remains excluded because each view often covers less than the whole bundle and the bundle moved between the two acquisitions. A correct association should record two unpaired detections, whereas a complete sequential association would lead to a systematic error.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/n1_aliasing.png}
+\caption[The shift ambiguity (schematic)]{The shift ambiguity (schematic). Each scanner covers a different part of the bundle, so a different bar is truncated in each acquisition. A correspondence shifted by one pitch would incorrectly pair all detections, whereas the correct correspondence leaves the two truncated detections unpaired. Letters identify the physical bar and hollow circles mark the unpaired detections.}
+\label{fig:aliasing}
+\end{figure}
+
+This condition is not an edge case because in many scenes of the dataset some bars are scanned at only one end. The objective is to determine what portion of the correspondence is actually recoverable and to define how unpaired detections are handled.
+
+The scans used in this thesis were provided by beanTech, the company that developed the vision software of the rig for the manufacturer that operates it. At the time of this work the rig was still being commissioned and only a limited number of scenes was available. This setting favours methods that require no training data, such as the classical detector and the pairing methods studied here, since the detector needs only the drawing of the bar cross-section.
+
 
 
 %------------------------------------------%
