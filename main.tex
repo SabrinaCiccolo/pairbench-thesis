@@ -260,6 +260,27 @@ Four main lines of research can nevertheless be identified, each resting on assu
 
 The gap addressed by this work lies between identifiability and evaluation. For an acquisition setup without visual overlap that observes identical elements at a regular spacing, it has not yet been formalised which part of the matching problem can be resolved in principle and which part is intrinsically undetermined. Consequently, reading an overall accuracy metric requires separating correctable algorithmic errors from structural limitations of the physical setup.
 
+\section{Contributions}
+\label{sec:intro-contributions}
+
+This thesis determines what the data of two non-overlapping views can recover. The geometry of the rig is recovered except for the absolute position of the scanners, whereas when the bars are evenly spaced the geometry of the scene determines the correspondence between the detections only up to a shift by a whole number of bars. The pairing methods are then evaluated on the basis of this distinction rather than through a single aggregate accuracy figure. The contributions of this work are the following.
+
+\begin{enumerate}
+
+\item \textbf{The mechanism of the shift ambiguity.} Besides the true association, the data are compatible with a family of associations shifted by a whole number of bars along the bundle. When the bars are evenly spaced, a shifted association has practically the same geometric cost as the true one, because the translation estimated for the scene changes by the same shift and the distances between paired faces stay the same. The two associations differ only in the number of detections left unpaired, which is lower for the true association when both views contain the same bars. For this reason the ambiguity depends on whether the scan window truncates the two views differently and not on how far the bundle moves between the two acquisitions (\cref{sec:setting-shift,sec:ambiguity-transport,sec:ambiguity-truncation}).
+
+\item \textbf{Confirmation on real data.} The errors of the most accurate pairing method on the real scenes follow this mechanism. Every scene on which the method fails completely is shifted as a whole and contains at least one detection without an annotated partner. In each of these scenes the wrong association also has a lower cost than the annotated one under the objective that the method minimises, so these errors depend on the information contained in the detections rather than on the search for the minimum (\cref{sec:eval-errors}).
+
+\item \textbf{Identifiability of the rig geometry.} Prior knowledge of the nominal bar length determines the separation between the two carriages but not their absolute position, which the scene content does not constrain. Alternating calibration and assignment recovers the separation and removes an error of about one metre along the bar axis (\cref{sec:identify-observability,sec:identify-recovery}). The length check of the original system cannot detect a shifted association, because pairing the ends of two adjacent bars changes the reconstructed length by far less than the tolerance of the check (\cref{sec:ambiguity-length}).
+
+\item \textbf{The hybrid method.} The pairing method proposed in this thesis applies the order constraint of the monotonic alignment within each stacking level and admits a bar crossing its neighbours only when the detections support it (\cref{sec:setting-pairing}). With both of the detectors compared in this thesis it is the most accurate of the methods tested, although on this dataset its advantage over pairing the detections by their order alone is not statistically significant (\cref{sec:eval-accuracy,sec:eval-detector}).
+
+\item \textbf{Evaluation of the pairing methods.} The counting metric checks only how many pairs are assigned and therefore does not distinguish a correct association from a shifted or swapped one. This thesis relies instead on a correspondence annotation linked to the detections by position, which makes it possible to score the output of any detector against the same ground truth (\cref{sec:setting-dataset,sec:eval-counting}).
+
+\item \textbf{Development and audit of a synthetic twin.} The synthetic twin, developed to simulate scene acquisitions, replicates detection counts and detector accuracy but does not model how far the bar ends stagger along the bar axis. This restricts the scope of any validation conducted on it to the transverse plane alone (\cref{sec:setting-twin}).
+
+\end{enumerate}
+
 
 
 %------------------------------------------%
