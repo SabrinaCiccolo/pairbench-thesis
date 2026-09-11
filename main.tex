@@ -281,6 +281,63 @@ This thesis determines what the data of two non-overlapping views can recover. T
 
 \end{enumerate}
 
+\chapter{The data, the rig and the task}
+\label{ch:setting}
+
+Apart from the controlled experiments on the synthetic twin (\cref{sec:setting-twin}), all results in this thesis come from real acquisitions. Every comparison is between pairing methods that operate on the same detections and return cross-view pairs.
+A detection is an end face identified in a single view, whereas a pairing method is the procedure that takes the detections from both views as input and returns a set of pairs connecting them.
+
+\section{The dataset, annotations and evaluation metrics}
+\label{sec:setting-dataset}
+
+A scene consists of a bundle of bars acquired once from each end, yielding two point clouds. The dataset comprises 108 scenes and 216 clouds, classified by profile family (\cref{tab:families}), with each scene associated with a manually assigned scenario category.
+
+\begin{table}[htbp]
+\centering
+\caption[Profile families of the dataset]{Profile families of the dataset. For each family, the shape of its cross-section as given by the CAD drawing, the number of scenes and the number of annotated faces. The L-profile appears twice because it was acquired in two separate campaigns, so the five families share four distinct cross-sections. The five families total 108 scenes and 935 faces.}
+\label{tab:families}
+\begin{tabular}{@{}llrr@{}}
+\toprule
+profile family & cross-section & scenes & annotated faces \\
+\midrule
+complex profile & complex & 4 & 15 \\
+heavy profile & rectangular, 80 $\times$ 95~mm & 11 & 68 \\
+L-profile & asymmetric L-shape & 40 & 274 \\
+L-profile, second acquisition & asymmetric L-shape & 24 & 223 \\
+square profile & square, 40 $\times$ 40~mm & 29 & 355 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The second column indicates the cross-section shape, obtained from the CAD drawing of the profile. Although the dataset consists of five families, there are only four distinct cross-sections because the L-profile appears twice due to two separate acquisition campaigns.
+
+The categories describe the arrangement of the bars in the bundle: single (56 scenes), overlapping (22), standing (15), crossed (9) and tilted (6). Across all scenes, a single side features a median of 4 faces and a maximum of 29.
+
+Truncation, where a bar is visible to only one scanner, affects 30 of the 108 scenes and leaves 49 of the 935 faces without a counterpart in the other view. Consequently, the assumption that every bar is visible to both scanners fails in roughly one out of four scenes.
+
+Two types of annotations have been defined.
+
+The first is a count annotation, indicating how many end faces are visible for each side. It was made first, by hand, on images generated from the point clouds and independently of any detector.
+
+The second is a correspondence annotation that, for each scene, provides a list of claims: inter-view pairs, each equipped with an anchor point on both faces, taken from the centroid of the face detected by the candidate-pool detector and confirmed by the annotator. In total, this annotation contains 407 claims, with at least one in every scene. The anchors allow each claim to be associated with the detections of the detector being evaluated, verifying whether the detector successfully produced that pair. A claim is resolved for a detector when both of its anchors can be linked to a detection of that detector. Where a scene needs it, the annotation also carries a note recording, for example, which profile is truncated in one view or not confirmed by the detector.
+
+The two annotations support different metrics. A counting metric checks only how many pairs a method produces, so the criterion is satisfied whenever the number of pairs is correct, even if all pairs are incorrect. For example, if two true pairs are swapped, the method still produces two pairs and the counting metric counts them as two true positives. The same happens when one view truncates a bar that the other contains, in which case an association shifted by one position along the row keeps the annotated pair count. Only the correspondence annotation indicates which pairs are correct and can therefore detect a swap. Work on multi-camera tracking faced a similar limitation and resolved it with identity-based precision and recall metrics \citev{ristani2016}.
+
+Four metrics are evaluated:
+
+\begin{itemize}
+\item \textbf{Counting precision, recall and F1}: compare the number of faces or pairs produced by a method against the count annotation, both scene-by-scene and aggregated. A true positive is defined as the smaller of the two numbers, calculated per side for faces and per scene for pairs.
+\item \textbf{Correspondence recall}: the proportion of claims correctly reproduced by a method (i.e., with correct bar identity), evaluated over the set of resolved claims. Restricting the score to resolved claims prevents a missing detection from being counted as a pairing error, following the distinction formalised by HOTA for tracking \citev{luiten2021}.
+\item \textbf{IPAA-1.0} (Image-Pair Association Accuracy at 1.0): the proportion of scenes correctly resolved in their entirety (referred to as IPAA-100 in MessyTable \citev{cai2020}). While aggregated recall gives greater weight to scenes with many associations, IPAA-1.0 weighs every scene equally. Furthermore, it aligns most closely with a line operator's experience, where an entire bundle is processed as a single unit.
+\item \textbf{Inversions}: the count of pairs within the same row that lie side-by-side at the same height in both views but exhibit an inverted Y-order between them. These capture the swaps that counting metrics cannot detect by design.
+\end{itemize}
+
+In this thesis, all confidence intervals are calculated by resampling bundles rather than pairs. Pairs within the same scene share the same bundle, transport estimate and assignment, so they are not independent samples and an error tends to affect the whole scene rather than individual pairs. Some scenes are also repeat captures of the same stationary bundle, whose point clouds coincide within 2~mm on almost every point. These scenes are grouped and resampled together, so the 108 scenes of the dataset form 96 independent units, called bundles in the rest of the thesis. For correspondence metrics all of them are resampled, since each scene contains at least one claim.
+
+All results reported here are based on the candidate-pool detector (\cref{sec:setting-detection}). The anchors were defined from its output, so every claim corresponds to one of its detections and all 407 claims can be scored.
+
+The alternative detector, based on two-pass suppression (\cref{sec:setting-detection}), resolves 382 of the 407 claims and re-associates faces with a median error of 0.96~mm, compared to 0.00~mm for the candidate-pool detector. The comparison between the two detectors therefore measures how robust each method is to a change of detector rather than which detector is more accurate.
+
 
 
 %------------------------------------------%
