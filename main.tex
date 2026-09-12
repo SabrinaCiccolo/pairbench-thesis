@@ -338,6 +338,45 @@ All results reported here are based on the candidate-pool detector (\cref{sec:se
 
 The alternative detector, based on two-pass suppression (\cref{sec:setting-detection}), resolves 382 of the 407 claims and re-associates faces with a median error of 0.96~mm, compared to 0.00~mm for the candidate-pool detector. The comparison between the two detectors therefore measures how robust each method is to a change of detector rather than which detector is more accurate.
 
+\section{Acquisition geometry}
+\label{sec:setting-geometry}
+
+Two scanners are placed at opposite ends of a conveyor belt, each mounted on its own linear carriage. The global reference frame (in millimetres) is defined relative to the robot: the X-axis aligns with the bars and carriage motion, the Y-axis indicates the conveyor feed direction and the Z-axis represents height. Calibration relates each scanner's local frame to the global frame via a rigid transformation $p_{\text{world}} = R\,p_{\text{scanner}} + t$.
+After calibration, the point clouds are orthographically projected onto the YZ plane (feed and height), which lies nearly frontal to the end faces.
+
+Two calibrations are available. The offline calibration, defined by a single rotation and translation knot per scanner, yields a constant rigid transformation valid exclusively at the carriage position where knots were acquired. By contrast, the original system calibration uses ten knots per scanner across roughly 2.1~m of travel, interpolating between them with a centripetal Catmull-Rom spline for translation and spherical cubic interpolation (SQUAD) for rotation, with values clamped at the boundaries.
+Applying the original calibration would require the carriage position of every scan, which is absent from the dataset, so the constant offline calibration was used instead. Consequently, accuracy is limited to the single acquired position, introducing an error along the X coordinate, the axis of carriage motion, that is subsequently measured and compensated (\cref{sec:identify-recovery}). \Cref{fig:scene3d} shows the two clouds of one scene in the world frame.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/d2_scene3d.png}
+\caption[Two views of one scene in the world frame]{Two views of one scene in the world frame. The two point clouds of a single scene in the global reference frame. The radial filter, applied before calibration, discards any point beyond 850~mm from its scanner, which isolates the end faces from the machine and the conveyor belt and leaves 15{,}037 of the 298{,}061 points on the first side. Nothing is ever acquired between the two clouds, so the bar is never fully scanned. The scene belongs to the L-profile family.}
+\label{fig:scene3d}
+\end{figure}
+
+Several quantities in \cref{tab:rig-quantities}, along with certain detection constants, originate from the source code of the original system installed on the machine.
+
+\begin{table}[htbp]
+\centering
+\caption[Quantities of the rig and of the acquisitions]{Quantities of the rig and of the acquisitions. For each quantity, its value and how it was obtained. Lengths are in millimetres in the world frame, where X runs along the bars, Y along the conveyor feed and Z in height.}
+\label{tab:rig-quantities}
+\begin{tabular}{@{}p{3.3cm}p{3.3cm}p{7.4cm}@{}}
+\toprule
+Quantity & Value & How it was obtained \\
+\midrule
+Standoff & 656~mm, interquartile range (IQR) [641, 669]~mm & Median radial distance between the scanner origin and the retained points across 216 clouds. \\
+Angle of incidence on the end face & 22.0$^\circ$ & Extracted from the production calibration rotation matrices. Stable within $\pm$0.35$^\circ$ over roughly 2.1~m of carriage travel. \\
+Angular envelope & [$-$19.3$^\circ$, $+$17.4$^\circ$], union of both sides & Field of view width of each scanner along its tangential direction, within its local frame. The lower limit repeats within 0.06$^\circ$ across 104 of 108 scenes on both sides, indicating a hardware limitation. \\
+Scan window & median 258~mm, maximum 414~mm & Calculated between the 0.5th and 99.5th percentiles of points retained after the 850~mm radial filter. Prior to filtering, the median extent is 479~mm. The effective window depends jointly on this radial filter and the device's angular span. \\
+Bar pitch & [38.6, 118.4]~mm & Range of median distances between adjacent bars, calculated for each of the five families on the correspondence anchors. \\
+Cross-view transport & median $|\Delta Y|$ 32.1~mm & Calculated per scene as the absolute value of the median $\Delta Y$ between the anchor points of the two views. The reported value represents the median of these values across all 108 scenes. \\
+Nominal bar length & 6005~mm & Value set by the operator in the original system, independent of the profile family. \\
+Distance between carriages & 5403.3~mm & Estimated via self-calibration (\cref{sec:identify-recovery}) rather than direct measurement. It differs by 1.3~mm from the documented separation of 2701~mm per side (5402~mm total). \\
+Effective resolution & 2.5~px/mm & Product of the rendering scale (10~px/mm) and the downscaling factor (0.25). \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 
 
 %------------------------------------------%
