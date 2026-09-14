@@ -377,6 +377,39 @@ Effective resolution & 2.5~px/mm & Product of the rendering scale (10~px/mm) and
 \end{tabular}
 \end{table}
 
+\section{Detection}
+\label{sec:setting-detection}
+
+The points that survive the radial filter are projected onto the YZ plane and a look-up table records which 3D points correspond to each pixel, enabling a 2D match to retrieve its 3D support.
+The profile cross-section is rasterised from the CAD drawing (DXF file) at 2.5~px/mm and slid over the image at 2$^\circ$ intervals across the full rotation. Every local cross-correlation maximum reaching the lost-face threshold of 0.2 constitutes a candidate (the threshold is defined relative to the template's self-correlation peak).
+
+The two detectors used in this work share this initial stage but differ in the criterion used to confirm candidates.
+
+The two-pass suppression detector decides on the 2D image: it confirms a candidate when the peak reaches the match threshold of 0.4 and the mask overlap exceeds 0.65, suppresses duplicates at an intersection over union (IoU) of 0.2, clears the confirmed footprints from the image and repeats the sweep so that a hidden face behind a stronger neighbour can emerge in the second pass.
+
+The candidate-pool detector instead decides based on the 3D points for which candidates compete. It retains every candidate above 0.2 without angle limits or bounding box overlap suppression, assigning to each candidate the 3D points within its footprint at its depth. Finally, a single global selection picks the subset explaining the most points against a fixed per-instance cost, with the constraint that no two selected candidates claim the same point. The candidate-pool detector is the one used in the remainder of this work, while two-pass suppression was retained to repeat the comparison between pairing methods on a different underlying detector. \Cref{fig:detection} shows how the two detectors interpret the same image.
+
+For each detected face, both methods return the 3D footprint points by masking the crop with the template shape and tracing back through the look-up table. Extracting the centroid and normal of the fitted plane via total least squares yields inputs for the pairing gates, combined with the matching angle retained from the 2$^\circ$ quantised sweep.
+
+In this detection phase, the resolution, the 2$^\circ$ step size and the correlation thresholds come from the original system installed with the machine. After identifying a face and retrieving its 3D points, that system executed an extra step: it re-projected the face onto its own plane, estimated using RANSAC \citev{fischler1981}, and repeated the angle search on that view with a finer step. It thus obtained a refined angle and a planar reference for each face.
+The detection pipeline used in this thesis does not perform this step. A more precise angle would tighten the consistency checks between the ends of the same bar without helping to decide which end belongs to which bar, since identical parallel bars share the same angle.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/f2_detection.png}
+\caption[Detection]{Detection. On the left, the projection on which both detectors operate after the radial filter and the template sweep. In the centre and on the right, the interpretation of the same image by each detector: confirmed detections are enclosed in coloured bounding boxes, while unconfirmed candidates appear in dashed grey boxes. In this case, both confirm the same five faces, but differ in the amount of residual unconfirmed evidence: four candidates versus seven.}
+\label{fig:detection}
+\end{figure}
+
+Across all 108 scenes, the candidate-pool detector achieves a precision of 0.986, a recall of 0.955 and an F1 score of 0.970 against per-side counts. A subsequent recovery stage increases recall to 0.967 and F1 to 0.976. Operating on unpaired faces, this stage estimates their position in the opposing view using the cross-view translation, searches for a local match and accepts it only if the 3D footprint exhibits valid end-face characteristics. Approximately 20\% of attempts are accepted.
+
+As a baseline for the classical detector, a small convolutional network was trained on the same annotations and with the same code. It predicts face centres as peaks of a Gaussian heatmap, with a second head recovering their offset within the output cell. This formulation follows the centre-point detection proposed in \citev{zhou2019}, whose Gaussian target and loss function derive from \citev{law2018}. Detection labels give only face centres, so a detector predicting bounding box extent and orientation would lack data to learn those parameters. Direct centre prediction instead keeps both model branches focused on per-side counts and the position of each face.
+
+The results of the learned model depend on how the data is split. In the scene-disjoint split, where the training and test scenes differ but contain the same cross-sections, the model achieves a test F1 of 0.902. In the family-disjoint split, the test family is never seen during training and the two L-profile acquisitions are held out together, yielding an F1 of 0.425. The drop from 0.902 to 0.425 shows that the model recognises previously seen sections well, but fails to generalise to novel geometry. Both values are averages across two training runs, in each of which the model sees only a subset of the annotations, and should be compared with the classical detector's 0.970. A paired bootstrap over bundles on one of the two runs gives, in both splits, a confidence interval for the difference that lies entirely below zero, so the learned model is significantly less accurate than the classical detector.
+
+The discrepancy between the two splits shows that the model learns the four cross-sections present in the dataset, but does not develop a general end-face detector. Given a DXF drawing, the classical detector requires no training data and therefore always operates in the family-disjoint regime. The price is inference time, which is 2.53~s per scene side against 18 to 24~ms for the learned model.
+The two F1 values are lower bounds, because training was stopped before the test F1 had converged under a CPU-only schedule. The qualitative conclusion does not depend on them, since the model does not generalise to an unseen cross-section.
+
 
 
 %------------------------------------------%
