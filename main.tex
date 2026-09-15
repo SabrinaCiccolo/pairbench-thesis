@@ -410,6 +410,29 @@ The results of the learned model depend on how the data is split. In the scene-d
 The discrepancy between the two splits shows that the model learns the four cross-sections present in the dataset, but does not develop a general end-face detector. Given a DXF drawing, the classical detector requires no training data and therefore always operates in the family-disjoint regime. The price is inference time, which is 2.53~s per scene side against 18 to 24~ms for the learned model.
 The two F1 values are lower bounds, because training was stopped before the test F1 had converged under a CPU-only schedule. The qualitative conclusion does not depend on them, since the model does not generalise to an unseen cross-section.
 
+\section{The association task and the methods compared}
+\label{sec:setting-pairing}
+
+The association task starts from the faces detected in the two views and determines which faces, one per view, represent the two ends of the same bar. The inputs are therefore the detections from the two views and the output is a set of pairs between detections. \Cref{fig:two_views} shows an example.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/d3_two_views.png}
+\caption[The same bundle seen from the two ends]{The same bundle seen from the two ends. YZ projection on which the two detectors operate for the same scene. The two views are drawn on the same Y-axis of the world reference frame, making the face positions directly comparable. The faces are identical up to the saw marks but the two views do not coincide along Y because the conveyor belt moves between the two acquisitions. The scene belongs to the L-profile family.}
+\label{fig:two_views}
+\end{figure}
+
+The faces detected in a view are grouped into stacking levels, i.e., the horizontal rows of the bundle. A face is one level above another when the Y coordinate of its centroid falls within the Y interval of the first and its centroid's Z coordinate exceeds the maximum Z of the second. This relationship is iterated until stabilisation and the faces in each level are sorted by decreasing Y. The grouping is relative to the bundle because no belt plane measurement is available and the original system provides no nominal value for it.
+
+The task is a partial association between the detections in the two views. Each detection includes a YZ centroid, a coarse matching angle, the estimated face normal and the stacking level to which it belongs. Given the detections $D_1 = \{d_1,\dots,d_m\}$ and $D_2 = \{e_1,\dots,e_n\}$ of the two sides, an association is a partial matching $\pi \subseteq D_1 \times D_2$ in which each detection appears at most once. Unpaired detections are allowed and, in this dataset, necessary because 49 faces have no counterpart.
+
+All association methods compared in this thesis share a single cost model:
+
+\begin{equation}
+c(i,j) = \frac{|\Delta\theta(i,j)|}{\tau_\theta} + \min\!\left(\frac{\|\Delta_{YZ}(i,j)\|}{\tau_d},\ \kappa\right) + \lambda_L\,|\mathrm{level}(i) - \mathrm{level}(j)| + \lambda_Z\,[\mathrm{outlier}(i) \neq \mathrm{outlier}(j)]
+\label{eq:cost}
+\end{equation}
+
 
 
 %------------------------------------------%
