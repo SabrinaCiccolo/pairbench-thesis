@@ -459,6 +459,26 @@ Seven pairing methods are compared in the rest of this work.
 \item \textbf{Hybrid method.} This is the approach proposed in this work. It applies monotonic alignment within each stacking level. The two views do not always report the same number of levels, for example when the top bar of a tall stack is recognised as a separate level in one view only, so in that case the levels are matched by their median height rather than by their index. A single ordered assignment over the entire bundle is used only when one of the views has a single level. It adds an explicit hypothesis for bar crossovers, which is accepted in two cases. In the first, both views independently observe the same number of bars raised relative to the rest of the bundle and those bars break the rigid motion of the bundle between the two views. In the second, a bar lying across the bundle rests on its neighbours at one end and on the bed at the other, so it is raised in one view only and has no counterpart near it once the translation between the views is applied. That bar is paired with the faces left unpaired on the other side using only orientation and distance, because the level and height terms of the cost model penalise precisely the elevation that identifies it.
 \end{itemize}
 
+\section{The shift family and identifiability}
+\label{sec:setting-shift}
+
+The bars of a stacking level lie next to each other in a fixed order from left to right, with an almost constant pitch $p$ within the bundle. The visible faces of a level are indexed along Y on each side, with the indices of side 2 offset so that the true correspondence pairs face $i$ of side 1 with face $i$ of side 2. For an integer $k$, the shift family is defined as
+
+\begin{equation}
+\pi_k \;=\; \{\, (i,\; i+k) \;:\; \text{both indices exist within the level} \,\}
+\label{eq:shift}
+\end{equation}
+
+which associates face $i$ of side 1 with face $i+k$ of side 2, leaving the $\vert{}k\vert{}$ faces at the boundary of each view unpaired. The true correspondence is therefore $\pi_0$. Each $\pi_k$ is a valid partial correspondence (\cref{sec:setting-pairing}), so the shared cost model assigns a cost to each of them.
+
+The shift family is important for three reasons:
+
+\textbf{Geometric degeneracy under exact regularity.} When the pitch is constant, shifting the association by $k$ positions and increasing the estimated translation by $k \cdot p$ leaves the YZ distances between paired faces unchanged. For a method that estimates a translation for each scene, the geometric terms of the cost therefore take the same value for $\pi_k$ and for $\pi_0$. This is the degenerate case of the unlabelled sensing problem \citev{unnikrishnan2018}, in which the correspondence can be recovered only from generic measurements, so that a bundle with a constant pitch is the extreme case of non-generic measurements.
+
+\textbf{Unpaired detections and truncation.} Since the bundle is finite, $\pi_k$ leaves unpaired the $\vert{}k\vert{}$ faces at the boundary of each view, whereas $\pi_0$ pairs every bar that both views contain. When the two views contain the same bars, the true correspondence therefore leaves fewer detections unpaired than any shifted one, whatever the transport. Pitch irregularity adds a geometric difference between the two, because an irregular bundle shifted by a whole pitch no longer matches the other view. Truncation that differs between the two views has the opposite effect. When one view cuts off a bar that the other contains, the true correspondence also leaves detections unpaired, so that against a shift towards the truncated side only the geometric difference remains, which is small when the pitch is regular. Neither the regularity of the pitch nor the position of the bundle in the scan window is under the control of the vision system.
+
+\textbf{The family is a proper subset of possible errors.} A repermutation (i.e., a permutation that alters the relative order) corresponds to a bar crossing over its neighbours. No $\pi_k$ contains a correspondence of this type. On real scenes, and restricted to the detections that have an annotated partner, the only associations that the cost model ranks above the ground truth leave a crossing bar unpaired, so they also fall outside the family (\cref{sec:ambiguity-real}). On the full detection set, by contrast, the wrong outputs of the hybrid method are shifts that cost less than the annotated pairs (\cref{sec:eval-errors}).
+
 
 
 %------------------------------------------%
