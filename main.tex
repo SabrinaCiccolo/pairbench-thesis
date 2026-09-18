@@ -497,6 +497,37 @@ Point statistics, however, do not match, since the twin contains 46\% of the rea
 
 Consequently, the twin is a stand-in for relative comparisons only and no conclusion that depends on the world-X channel is drawn from it. Every result obtained on the twin remains in the YZ projection and in the cost units of the model itself.
 
+\chapter{Identifiability of the carriage geometry}
+\label{ch:identifiable}
+
+The available offline calibration is valid in the YZ projection plane but incorrect along the X-axis, i.e., along the bar direction. Reconstructing the length of a bar by connecting the centroids of its two end faces yields a value systematically smaller than the nominal value of 6005~mm. The median residual is $-$1077.47~mm, with a very narrow IQR, [$-$1080.36, $-$1076.02]. The residual is therefore an almost constant offset rather than random noise. The default length tolerance of the original system's pairing gate is $\pm$10~mm and none of the 425 pairs considered falls within it.
+This occurs because the carriage positions, which the controller reads at scan time, are not stored in the scan data available to this work. The offline calibration has a single knot per scanner, valid for one carriage position, so applying it evaluates the calibration at that position rather than at the actual one and introduces an error of about one metre along X.
+
+While scene content alone recovers part of this geometry, it provably cannot recover the rest. The only metric datum that the recorded data preserves regarding a bar is its length, whose prior constrains only a single combination of the two carriage positions, leaving the orthogonal one free.
+
+\section{The length prior and its residual}
+\label{sec:identify-length}
+
+Each bar is cut to a nominal length $L = 6005$~mm, so each pair of end faces, one per view, should reconstruct exactly that value.
+
+Let $s_1$ and $s_2$ denote the positions of the two carriages along their respective translation axes and $w_1(s_1)$ and $w_2(s_2)$ the centroids in the world frame obtained by applying the calibration to those positions. The two views are also slightly offset in the projection plane. That offset is constant across the entire dataset along Z and varies scene by scene along Y (\cref{sec:identify-ztransport}), so the estimation involves a single unknown $t_z$ and no global term along Y. For a pair $k$ the residual is
+
+\begin{equation}
+r_k(s_1, s_2) = \left\Vert{} w_1^k(s_1) - \left( w_2^k(s_2) + (0, 0, t_z) \right) \right\Vert{} - L
+\label{eq:residual}
+\end{equation}
+
+The estimation of $s_1$ and $s_2$ minimises the median of the absolute value of the residuals:
+
+\begin{equation}
+(\hat s_1, \hat s_2) = \operatorname*{arg\,min}_{s_1, s_2} \ \operatorname{median}_k \left\vert{} r_k(s_1, s_2) \right\vert{}
+\label{eq:median-fit}
+\end{equation}
+
+rather than the sum of squares because the pairs used for fitting include some uncertain associations whose large residuals could dominate a least-squares fit. The median absolute residual is far less sensitive to such outliers, making it the preferred choice here.
+
+Since the objective is piecewise linear and exhibits non-differentiable points, the optimiser first performs a coarse grid search within the calibrated interval and then a local refinement, so that the result does not depend on an arbitrary initial point.
+
 
 
 %------------------------------------------%
