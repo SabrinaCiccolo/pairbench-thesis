@@ -528,6 +528,32 @@ rather than the sum of squares because the pairs used for fitting include some u
 
 Since the objective is piecewise linear and exhibits non-differentiable points, the optimiser first performs a coarse grid search within the calibrated interval and then a local refinement, so that the result does not depend on an arbitrary initial point.
 
+\section{Identifiability of the carriage positions}
+\label{sec:identify-observability}
+
+The residual depends on the two carriage positions but not on each one independently. Owing to the structure of the model, if both carriages shift by the same amount along X, both reconstructed positions move together, so the distance between them stays the same. Every reconstructed bar length is therefore unchanged, as is every residual. A prior on the length therefore captures only the difference $s_1 - s_2$. The orthogonal direction, along which the two carriages slide together, belongs to the exact kernel of the Jacobian of the residual, so it is not a poorly observed direction that more data could improve. Since the observations carry no information about this direction, it cannot be recovered with more data, another optimiser or a different selection of scenes.
+
+The degree to which the observed direction $s_1 - s_2$ is determined, by contrast, depends on the observations: on the number of pairs, their accuracy and their distribution. It is quantified by the curvature of the objective along that direction. The evaluation tool is the Gauss--Newton normal matrix $J^\top J$ of the residual with respect to the two parameters, divided by the number of pairs entering the fit to enable comparison across scenes of different sizes. It is the same observability analysis that the self-calibration literature applies to the parameters of a system \citev{maye2016}, \citev{nobre2019}, here reduced to a static problem with only two parameters.
+
+Across all 425 pairs, the following eigenvalues are obtained
+
+\[
+\lambda_1 = 2.008, \qquad \lambda_2 = 2.91 \times 10^{-8}, \qquad \lambda_1 / \lambda_2 = 6.90 \times 10^7
+\]
+
+The eigenvector associated with the largest eigenvalue, i.e., with the direction best determined by the data, is $(+0.708, -0.707)$, which corresponds to the direction $s_1 - s_2$ up to rounding errors. The matrix is obtained by linearising the residual around the estimate to which the alternation between calibration and assignment converges. Although linearisation is typically a local approximation whose result might depend on the evaluation point, this is not the case here because the null direction is exact across the entire parameter space and not only near the estimate. Consistently with this geometry, the second eigenvalue is zero within numerical precision.
+
+Consequently, the objective is flat along that direction, so it has no interior minimum there and the search continues until it reaches the boundary of the calibrated domain. Whatever pair of individual positions an estimate reports depends on where that boundary lies and only the difference between the two is a measurement. \Cref{fig:nullspace} shows this flat direction.
+
+The same matrix also shows that no scene is geometrically more favourable than the others. The contribution of each pair to the curvature along the observed direction varies between 2.007 and 2.009 across all 108 scenes, i.e., it is practically constant. Each pair therefore carries almost the same information regarding the separation because the derivative of the distance between the two centroids with respect to a carriage position is close to 1 for any bar, regardless of its position, its inclination and the number of bars in the scene. The accuracy of the estimate depends on the number of pairs and their correctness, rather than the choice of favourable scenes.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/n7a_nullspace.png}
+\caption[Unobservable direction of the length prior]{Unobservable direction of the length prior. Contour lines of the quadratic form in the two carriage positions $s_1$ and $s_2$, plotted starting from the two eigenvalues and the eigenvector reported by the observability analysis. The cost grows rapidly along the $s_1 - s_2$ direction (the observed one), while remaining flat along the orthogonal direction in which the two carriages slide together. With a curvature ratio of $6.90 \times 10^{7}$, the curves extend without bound in the flat direction. The width of the plotted strip is an empirical dispersion level, 3.4~mm at real scale, magnified 22 times to render it visible. The dashed line marks the lowest knot of the calibration interval, i.e., the boundary at which a search along the flat direction stops.}
+\label{fig:nullspace}
+\end{figure}
+
 
 
 %------------------------------------------%
