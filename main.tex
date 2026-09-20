@@ -554,6 +554,59 @@ The same matrix also shows that no scene is geometrically more favourable than t
 \label{fig:nullspace}
 \end{figure}
 
+\section{Recovering the carriage separation}
+\label{sec:identify-recovery}
+
+The estimation requires pairs as input, yet these derive from an assignment that itself depends on the calibration. Calibration and assignment are therefore estimated alternately:
+
+\begin{enumerate}
+\item assignment is performed, under the current calibration;
+\item the positions $\hat s_1, \hat s_2$ and the residual offset are re-estimated on the obtained pairs;
+\item the process is repeated until the assignment is identical between two consecutive iterations.
+\end{enumerate}
+
+Here convergence means that the assignment has stopped changing, not that a numerical tolerance has been reached. Two iterations are needed.
+
+As the unobserved direction predicts, $\hat s_2$ settles at $-$3339.0~mm, the lower knot of the calibration interval, rather than at an interior minimum. Since no data constrain that direction, this value only marks where the search stops, whereas the difference $\hat s_1 - \hat s_2$ is a genuine measurement.
+
+\begin{table}[htbp]
+\centering
+\caption[Bar length residual under the three calibrations]{Bar length residual under the three calibrations. The residual is the reconstructed bar length minus the nominal 6005~mm. For the offline calibration, a one-shot fit on a fixed assignment and the joint self-calibration, the table reports the median residual, its interquartile range in millimetres and the number of pairs within the default $\pm$10~mm tolerance of the length check of the original system. The first and last rows use the pairs of the hybrid method, whereas the one-shot fit uses those of free assignment.}
+\label{tab:length-residual}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+bar length residual & median & IQR & within $\pm$10~mm \\
+\midrule
+offline calibration with single knot & $-$1077.47~mm & [$-$1080.36, $-$1076.02] & 0 / 425 \\
+one-shot fit on fixed assignment & $-$1.48~mm & [$-$5.11, $+$0.15] & 359 / 415 \\
+joint self-calibration & $-$0.15~mm & [$-$2.99, $+$1.38] & 403 / 425 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The first and last rows of \cref{tab:length-residual} use the hybrid method, on the offline calibration and on the recovered one, respectively. The middle row instead uses a free assignment and keeps the pairs fixed throughout the process. It therefore differs from the joint fit in two ways: the origin of the pairs and their ability to change. Its median is nominally closer to zero, but this is uninformative given that the median is precisely the quantity optimised by the objective. The informative columns are the dispersion and the fraction of pairs within $\pm$10~mm. With an IQR of 4.36~mm against 5.26~mm the joint fit is tighter, as expected, because it no longer fits the calibration to pairs that the calibration itself would have discarded.
+
+The recovered separation is
+
+\[
+\hat s_1 - \hat s_2 = 5403.3\text{ mm}
+\]
+
+and has an independent verification. Both the replay tool and the test harness of the original system use a default carriage position of 2701~mm per side, i.e., 5402~mm of separation, described in its documentation as a dashboard convention. The estimated value, obtained solely from scene content and the length prior without access to that constant, agrees with it within 1.3~mm.
+
+None of this establishes that the recovered separation is accurate in an absolute sense. No independent metrology of this rig exists and the constant of the original system, however close, is a software convention rather than a measured distance. The fit also has two free parameters and only one identifiable combination. A richer calibration model, with per-knot corrections or a rotational term, is not tested here and is not guaranteed to remain identifiable from the same prior.
+
+Regarding uncertainty, the quantity to quote is the reproducibility across scenes rather than the repeatability across pairs. Estimating the separation independently on each scene yields a median of 5403.0~mm and an IQR of [5401.9, 5405.3]. A bootstrap on the joint fit that resamples bundles (\cref{sec:setting-dataset}) gives [5402.8, 5403.8]. \Cref{fig:separation} shows the separation estimated on each scene.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/n7b_separation.png}
+\caption[Cross-scene reproducibility of the carriage separation]{Cross-scene reproducibility of the carriage separation. The carriage separation estimated independently on each of the 108 scenes. The joint fit of 5403.3~mm is shown with the interquartile range of the per-scene values, along with the working constant of the original system (2701~mm per side), a value to which the fit never had access.}
+\label{fig:separation}
+\end{figure}
+
+The dispersion across scenes indicates matching quality rather than calibration quality. The outliers comprise one scene with two pairs at one extreme (5378.2~mm) and one with four pairs at the other (5421.2~mm). A scene whose pairs are wrong will estimate whatever separation makes those pairs consistent, regardless of how many it contains.
+
 
 
 %------------------------------------------%
