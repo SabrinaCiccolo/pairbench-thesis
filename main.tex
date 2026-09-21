@@ -628,6 +628,46 @@ Recalibration does not alter the relative performance of the pairing methods. Th
 
 None of the results presented in this chapter addresses the ambiguity that forms the core subject of this thesis. Recovering the separation solves the metric problem of reconstructing a cross-view pair with the correct length. The combinatorial problem remains unchanged, as a bar reconstructed with the correct length provides no indication of which among several identical neighbouring elements was actually paired with it. This is the first of the properties of the shift family stated in \cref{sec:setting-shift}: under exact regularity, geometry does not distinguish a shifted correspondence from the true one. The metric recovery in this chapter does not affect that property because it operates on the calibration rather than the combinatorial ambiguity.
 
+\chapter{Shift ambiguity after self-calibration}
+\label{ch:ambiguity}
+
+Self-calibration removes the metric error of the rig, so that a correct cross-view pair reconstructs the nominal bar length (\cref{sec:identify-recovery}). The length of a pair, however, gives no indication of which of several identical neighbouring bars a face belongs to. This combinatorial ambiguity is described by the shift family $\pi_k$ of \cref{sec:setting-shift}, which pairs each face on one side with the face $k$ positions further along on the other.
+
+\section{Sensitivity of the length check to a one-bar shift}
+\label{sec:ambiguity-length}
+
+The aggregation gate of the original system accepts a candidate pair only when the distance between the centroids of its two end faces lies within $\pm$10~mm of the nominal bar length $L$ (\cref{sec:setting-pairing}). Of the three checks in this gate, it is the only one based on a property of the product itself, whereas the torsion and tilt checks, like every term of the shared cost model, compare the geometry of the two faces.
+
+Consider a member $\pi_k$ of the shift family, which pairs the end of bar $i$ on one side with the end of bar $i+k$ on the other. The reconstructed segment then joins two different bars and becomes the hypotenuse of a right-angled triangle whose legs are the bar length $L$ and the lateral offset $kp$, where $p$ is the bar pitch. The reconstructed length therefore changes by
+
+\begin{equation}
+\Delta\ell(k) = \sqrt{L^2 + (kp)^2} - L \approx \frac{(kp)^2}{2L}
+\label{eq:length-change}
+\end{equation}
+
+with $L = 6005$~mm, so the change grows with the square of the offset. \Cref{tab:length-change} gives $\Delta\ell$ for a one-bar shift at the measured pitch of each family (\cref{fig:sections}), in millimetres and in units of $\sigma = 3.23$~mm, the standard deviation that a normal distribution would need to reproduce the interquartile range of the length residual after self-calibration (\cref{sec:identify-recovery}).
+
+\begin{table}[htbp]
+\centering
+\caption[Length change caused by a one-bar shift]{Length change caused by a one-bar shift. For each family, the measured bar pitch, the change $\Delta\ell$ in the reconstructed length when a pair joins the ends of two adjacent bars and the same change in units of $\sigma = 3.23$~mm, the standard deviation of a normal distribution with the same interquartile range as the length residual after self-calibration. The length check of the original system has a tolerance of $\pm$10~mm.}
+\label{tab:length-change}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+family & pitch (mm) & $\Delta\ell$, one pitch (mm) & $\Delta\ell / \sigma$ \\
+\midrule
+L-profile, second acquisition & 38.6 & 0.12 & 0.04 \\
+square profile & 40.2 & 0.13 & 0.04 \\
+L-profile & 69.2 & 0.40 & 0.12 \\
+heavy profile & 96.0 & 0.77 & 0.24 \\
+complex profile & 118.4 & 1.17 & 0.36 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Since the pitch is much smaller than the bar length, a one-bar shift changes the reconstructed length by at most about 1~mm, against a tolerance of $\pm$10~mm.
+
+Setting $\Delta\ell = 10$~mm in the formula gives the lateral offset at which the check would react, $kp \approx 347$~mm, which is about 9 pitches for the square profile, 5 for the L-profile and 3 for the complex profile, the family with the largest pitch. More than nine clouds in ten have a narrower scan window than this (median 258~mm, 90th percentile 337~mm), so only the widest ones, up to 414~mm (\cref{sec:setting-geometry}), could contain such an offset. A threshold of $3\sigma \approx 9.7$~mm in place of the fixed $\pm$10~mm gives almost the same offset (341~mm), so the limit lies in the geometry of the check and not in the choice of tolerance.
+
 
 
 %------------------------------------------%
