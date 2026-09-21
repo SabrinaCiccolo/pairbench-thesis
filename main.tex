@@ -607,6 +607,27 @@ Regarding uncertainty, the quantity to quote is the reproducibility across scene
 
 The dispersion across scenes indicates matching quality rather than calibration quality. The outliers comprise one scene with two pairs at one extreme (5378.2~mm) and one with four pairs at the other (5421.2~mm). A scene whose pairs are wrong will estimate whatever separation makes those pairs consistent, regardless of how many it contains.
 
+\section{Calibration in Z, transport in Y}
+\label{sec:identify-ztransport}
+
+A residual offset between views in the projection plane could stem from a miscalibrated axis or a transport of the bar between the two acquisitions. The former is constant, whereas the latter varies from scene to scene because the two views of a scene are acquired at different times while the conveyor moves. A variable offset therefore cannot be attributed to calibration.
+
+The median cross-view offsets per scene, computed over 108 scenes for each axis, are reported below. Each scene's offset is the median across its pairs.
+
+\begin{itemize}
+\item Z: median $+$1.64~mm, IQR [$+$1.12, $+$2.30]. With an IQR width of 1.18~mm, the Z offset varies by little more than a millimetre across scenes, a magnitude compatible with a constant calibration offset.
+\item Y: median $-$5.36~mm, IQR [$-$47.56, $+$21.04]. The IQR width is 68.60~mm, nearly sixty times that of Z, while 62 of the 108 scenes exhibit an offset exceeding $\pm$30~mm. The dispersion is thus wider and heavy-tailed, with the variability concentrated along the transport axis.
+\end{itemize}
+
+Consequently, the Z component is attributed to calibration, while the Y component is attributed to transport. This is why the residual described in \cref{sec:identify-length} includes a dataset-wide constant term along the Z-axis, but none along the Y-axis. This distinction forms the basis of a choice already adopted by the pairing methods: aligned assignment, monotonic alignment and the hybrid method all estimate a scene-specific YZ translation via RANSAC consensus, rather than relying on calibration along the Y-axis.
+
+\section{Metric recovery and the combinatorial ambiguity}
+\label{sec:identify-metric}
+
+Recalibration does not alter the relative performance of the pairing methods. The counting F1 varies by at most 0.002 for each of the methods re-scored. The exception is the order-based anchor with the length check of the original system, which jumps from 0.000 to 0.917. This jump comes from removing the $-$1077~mm bias, which made every pair fail the check. Once the bias is removed the check can be passed again, although this does not mean that it separates correct pairs from incorrect ones (\cref{sec:ambiguity-length}).
+
+None of the results presented in this chapter addresses the ambiguity that forms the core subject of this thesis. Recovering the separation solves the metric problem of reconstructing a cross-view pair with the correct length. The combinatorial problem remains unchanged, as a bar reconstructed with the correct length provides no indication of which among several identical neighbouring elements was actually paired with it. This is the first of the properties of the shift family stated in \cref{sec:setting-shift}: under exact regularity, geometry does not distinguish a shifted correspondence from the true one. The metric recovery in this chapter does not affect that property because it operates on the calibration rather than the combinatorial ambiguity.
+
 
 
 %------------------------------------------%
