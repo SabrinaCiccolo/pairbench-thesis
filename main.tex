@@ -718,6 +718,38 @@ Pitch jitter makes geometry informative. At 10~mm the geometric term of the shif
 
 The sweep covers a single family, a single bar count and three seeds per cell. This is enough to establish whether the mechanism is periodic but not to estimate its size for other families. The margin is also a cost difference in the units of the model and not an error rate, so a wide margin can still be lost to a detection failure upstream.
 
+\section{Truncation and transport}
+\label{sec:ambiguity-truncation}
+
+Since the margin comes from the counting term, anything that changes the number of unpaired detections changes the margin, including a scan window that cuts off a bar. Truncation is common on this rig, since 30 of the 108 scenes contain at least one face without a partner (\cref{sec:setting-dataset}) and six L-profile bars at the measured pitch already span about 415~mm, against a median scan window of 258~mm (\cref{sec:setting-geometry}).
+
+Two matched synthetic suites separate truncation from transport. Both use a bundle of four L-profile bars and sweep the transport from 0 to 1.5 pitches, pooling six jitter levels between 0 and 20~mm. In the first suite the bundle sits at the edge of the scan window, so that transport carries bars in and out of view, while in the second the same bundle is centred with clearance on both sides, so that no bar leaves the window. For each transport, \cref{tab:placement} reports the correspondence recall of the hybrid method over the bars detected on both sides and the number of scene-sides, out of 36, on which the number of detections differs from the number of faces present. This count measures how often truncation changed what a view sees.
+
+\begin{table}[htbp]
+\centering
+\caption[Truncation against transport]{Truncation against transport. Synthetic bundle of four L-profile bars placed at the edge of the scan window or centred in it, with the cross-view transport expressed as a fraction of the bar pitch. For each transport, the correspondence recall of the hybrid method over the bars detected on both sides and the number of scene-sides, out of 36, on which the number of detections differs from the number of faces present. Each row pools six jitter levels between 0 and 20~mm.}
+\label{tab:placement}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+transport / pitch & edge recall & edge count mismatch & centre recall & centre count mismatch \\
+\midrule
+0 & 1.000 & 35/36 & 1.000 & 0/36 \\
+0.25 & 1.000 & 20/36 & 1.000 & 0/36 \\
+0.50 & 1.000 & 18/36 & 1.000 & 0/36 \\
+0.75 & 0.889 & 18/36 & 1.000 & 0/36 \\
+1.00 & 0.944 & 18/36 & 1.000 & 0/36 \\
+1.25 & 0.944 & 18/36 & 1.000 & 0/36 \\
+1.50 & 0.944 & 18/36 & 1.000 & 0/36 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The centred bundle keeps perfect recall at every transport, so within this bundle size the magnitude of the transport causes no damage on its own and the loss of recall at the edge comes from truncation.
+
+The edge column adds a more specific result. At zero transport it has the highest count mismatch in \cref{tab:placement} and still perfect recall, because both views truncate the same bar, their visible sets coincide and no wrong pairing is possible. A non-zero transport makes the truncation differ between the two views and recall follows this asymmetry rather than the distance travelled, since it is lowest at an intermediate transport of 0.75 pitches and not at the largest one. \Cref{fig:aliasing} shows exactly this configuration. As the decomposition of \cref{sec:ambiguity-transport} explains, when the two views truncate different bars the true correspondence itself leaves detections unpaired and pays the counting term, so it loses the advantage that this term normally gives it over a shifted hypothesis.
+
+The sweep of \cref{sec:ambiguity-transport} measures this effect directly on its bundle of five square-section bars. At the edge placement, once the transport reaches three quarters of a pitch the two views detect different numbers of bars and the margin against the shift towards the truncated side, $\pi_{-1}$, collapses. When the two views detect the same number of bars its median is 7.3 to 8.3, almost all from the counting term. When they do not, both hypotheses leave the same number of detections unpaired and the median margin is only the geometric difference, 0.02 cost units for a regular bundle, 0.19 with 2~mm of jitter and 1.11 with 10~mm. On 5 of the 117 edge scenes the shift costs less than the true correspondence. The margin against the shift in the other direction stays between 7.5 and 8.3 throughout.
+
 
 
 %------------------------------------------%
