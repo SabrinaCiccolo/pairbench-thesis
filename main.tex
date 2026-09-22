@@ -668,6 +668,56 @@ Since the pitch is much smaller than the bar length, a one-bar shift changes the
 
 Setting $\Delta\ell = 10$~mm in the formula gives the lateral offset at which the check would react, $kp \approx 347$~mm, which is about 9 pitches for the square profile, 5 for the L-profile and 3 for the complex profile, the family with the largest pitch. More than nine clouds in ten have a narrower scan window than this (median 258~mm, 90th percentile 337~mm), so only the widest ones, up to 414~mm (\cref{sec:setting-geometry}), could contain such an offset. A threshold of $3\sigma \approx 9.7$~mm in place of the fixed $\pm$10~mm gives almost the same offset (341~mm), so the limit lies in the geometry of the check and not in the choice of tolerance.
 
+\section{The ambiguity as a function of cross-view transport}
+\label{sec:ambiguity-transport}
+
+The ambiguity might be expected to depend on the cross-view transport and in particular to become more severe when the transport approaches a whole multiple of the pitch. Correspondence recall is not a suitable quantity for testing this, because it mixes three effects: whether the detector found the bars, whether the two views contain the same set of bars and whether the pairing objective can tell the true correspondence from a shifted hypothesis. Only the third effect is the ambiguity, so the experiment measures the objective directly, on synthetic scenes in which bar identity is known by construction (\cref{sec:setting-twin}). The synthetic twin reproduces the input of the detector but not the point cloud behind it, so the results of this section and of \cref{sec:ambiguity-truncation} hold in the YZ projection and in the cost units of the model.
+
+The objective is the one that monotonic alignment minimises and that the hybrid method solves within each stacking level. It scores a complete association, called a hypothesis here, as the sum of two terms. The geometric term sums the pair costs $c(i, j)$ of \cref{sec:setting-pairing} over the matched pairs, after aligning the two views by the median cross-view translation of those same pairs, so that each hypothesis is scored at the translation that suits it best. The counting term adds 3.75 for each detection that the hypothesis leaves unpaired on either side, half of the cost of 7.5 for leaving both faces of a pair unpaired (\cref{sec:setting-pairing}). The experiment scores both the true correspondence $\pi_0$ and the one-bar shift $\pi_1$ in this way and reports
+
+\begin{equation}
+\mathrm{margin} = \mathrm{cost}(\pi_1) - \mathrm{cost}(\pi_0),
+\label{eq:margin}
+\end{equation}
+
+which is positive when the true correspondence has the lower cost.
+
+The sweep uses a bundle of five square-section bars. Its pitch is among the finest in the dataset and its 90$^\circ$ symmetry period leaves the orientation term with the least information, which makes it the hardest case for the objective. The cross-view transport goes from 0 to 3 whole pitches in steps of a quarter pitch and is combined with two placements of the bundle and three levels of pitch jitter, 0, 2 and 10~mm. The jitter is the standard deviation of a Gaussian perturbation added to the lateral position of each bar in an otherwise regular bundle. In the centred placement no bar leaves the scan window at any transport, which keeps truncation out of the test, while in the other placement the same bundle sits at the edge of the window.
+
+The margin against $\pi_1$ shows no periodicity. At both placements and at every jitter level, the median margin at whole multiples of the pitch differs from the median between them by at most 0.01 cost units, against margins between 7.5 and 8.6. Under regular spacing the ambiguity is therefore present at every transport, which is the degeneracy that \cref{sec:setting-shift} states as the first property of the shift family. \Cref{fig:ambiguity-sweep} shows the centred sweep.
+
+The centred sweep shows a single change, at the end of the range. At the largest transport the margin narrows slightly, from 7.69 to 7.48 with 2~mm of jitter and from 8.60 to 8.17 with 10~mm. No bar leaves the window and the number of unpaired detections stays constant, so the change comes from the geometric terms of the two hypotheses. At three pitches the true pairs fit slightly worse than at smaller transports. Without jitter the shifted pairs fit worse by the same amount and the margin does not change, whereas with jitter they worsen less or even improve, so the true correspondence loses part of its advantage. The narrowing does not appear at one or two pitches, where a periodic effect would place it.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/n9_ambiguity_sweep.png}
+\caption[The ambiguity sweep]{The ambiguity sweep. Cost margin between a one-bar shift and the true correspondence as a function of the cross-view transport, for a bundle of five square-section bars centred in the scan window, so that no bar ever leaves it, at three levels of pitch jitter. Each point is the median over three random seeds. The dotted lines mark whole multiples of the pitch, where a periodic ambiguity would show a dip, whereas the margin stays flat across all of them and drops only at the end of the range for the two jittered bundles.}
+\label{fig:ambiguity-sweep}
+\end{figure}
+
+The two terms of the objective explain why the margin stays constant. Their median values over the centred sweep are given in \cref{tab:margin-terms}.
+
+\begin{table}[htbp]
+\centering
+\caption[Geometric and counting terms of the objective]{Geometric and counting terms of the objective. Median values in cost units for the true correspondence $\pi_0$ and the one-bar shift $\pi_1$, with the median margin $\mathrm{cost}(\pi_1) - \mathrm{cost}(\pi_0)$, for each level of pitch jitter. The medians are taken over the centred sweep, in which a synthetic bundle of five square-section bars stays inside the scan window while the cross-view transport goes from 0 to 3 pitches.}
+\label{tab:margin-terms}
+\begin{tabular}{@{}lrrrrr@{}}
+\toprule
+jitter & geometric, $\pi_0$ & geometric, $\pi_1$ & counting, $\pi_0$ & counting, $\pi_1$ & margin \\
+\midrule
+0~mm & 0.04 & 0.06 & 0.00 & 7.50 & 7.52 \\
+2~mm & 0.07 & 0.22 & 0.00 & 7.50 & 7.69 \\
+10~mm & 0.05 & 1.12 & 0.00 & 7.50 & 8.59 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+At zero jitter geometry contributes almost nothing to the margin. A shifted hypothesis estimates its own translation, which absorbs the transport completely, so under perfectly regular spacing its pairs fit as well as the true ones. The whole margin comes from the counting term because in a bundle of $n$ bars a one-bar shift pairs only $n-1$ of them and the two detections it leaves unpaired cost 3.75 each.
+
+Pitch jitter makes geometry informative. At 10~mm the geometric term of the shifted hypothesis rises to 1.12 while that of the true correspondence stays at 0.05, because an irregular bundle cannot be slid by one pitch and still fit. Irregularity therefore plays the role that genericity of the measurements plays in unlabelled sensing \citev{unnikrishnan2018}, since a bundle with constant pitch is the degenerate case and jitter restores the discriminating power of geometry. This is the mechanism that \cref{sec:setting-shift} states as the second property of the shift family.
+
+The sweep covers a single family, a single bar count and three seeds per cell. This is enough to establish whether the mechanism is periodic but not to estimate its size for other families. The margin is also a cost difference in the units of the model and not an error rate, so a wide margin can still be lost to a detection failure upstream.
+
 
 
 %------------------------------------------%
