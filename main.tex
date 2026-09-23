@@ -804,6 +804,39 @@ When the counting metric does distinguish two methods, correspondence recall doe
 
 This is an instance of the discrepancy recently described for multi-view association \citev{shelukhan2026}, where a better score on a proxy metric does not necessarily mean a better assignment.
 
+\section{Structure of the pairing errors}
+\label{sec:eval-errors}
+
+If a method made independent errors on individual pairs, most scenes with an error would be only partly wrong. To test this hypothesis, each scene is classified as clean when all resolved claims are exact, wrong when none are and partial in all other cases (\cref{tab:eval-errors}). A wrong scene is considered a pure shift when all its claims are shifted by the same non-zero index offset $k$ within their respective stacking level. In that case the output of the method for that scene corresponds to element $\pi_k$ of the shift family defined in \cref{sec:setting-shift}, rather than an arbitrary permutation.
+
+\begin{table}[htbp]
+\centering
+\caption[Classification of the scenes by pairing outcome]{Classification of the scenes by pairing outcome. Each of the 108 real scenes is clean when all resolved claims are correctly reproduced, wrong when none is and partial otherwise, with the detections of the candidate-pool detector. The wrong scenes are also counted when they have at least two resolved claims and when they are pure shifts, that is, when all claims are shifted by the same non-zero offset $k$ within their stacking level. The last column breaks the pure shifts down by $k$.}
+\label{tab:eval-errors}
+\begin{tabular}{@{}p{2.9cm}rrrrrl@{}}
+\toprule
+method & clean & partial & wrong & \begin{tabular}[b]{@{}c@{}}wrong,\\$\geq$2 claims\end{tabular} & \begin{tabular}[b]{@{}c@{}}pure\\shift\end{tabular} & \begin{tabular}[b]{@{}c@{}}shift\\sizes\end{tabular} \\
+\midrule
+\raggedright order-based anchor, no length check & 80 & 12 & 16 & 14 & 12 & $k=-1$: 5, $k=+1$: 7 \\
+\raggedright order-based anchor, no checks & 91 & 3 & 14 & 13 & 10 & $k=-1$: 3, $k=+1$: 7 \\
+\raggedright free assignment & 73 & 19 & 16 & 16 & 3 & $k=-1$: 1, $k=+1$: 2 \\
+\raggedright aligned assignment & 80 & 14 & 14 & 14 & 5 & $k=-1$: 3, $k=+1$: 2 \\
+\raggedright monotonic alignment & 86 & 16 & 6 & 6 & 5 & $k=-1$: 3, $k=+1$: 2 \\
+\raggedright hybrid method & 96 & 7 & 5 & 5 & 5 & $k=-1$: 3, $k=+1$: 2 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+In the case of the hybrid method, all five wrong scenes contain at least two claims and are pure shifts by exactly one bar. Together they account for 19 of the 29 wrong claims, which means that most of the method's error comes from whole scenes shifted at once rather than from noise on individual pairs. A pair-based metric describes this error process poorly, since the failing unit is the scene itself. For this reason, every confidence interval in this work involves resampling whole scenes grouped into bundles (\cref{sec:setting-dataset}).
+
+These five wrong scenes share a common property. Of the 102 scenes with at least two resolved claims, 59 have an annotated partner for every detection on both views and the hybrid method makes no error on any of them, whereas the five wrong scenes are all among the remaining 43, where at least one detection lacks an annotated partner. Such a detection may be a bar that the other view truncates, a bar whose face the detector misses in the other view, a false detection or a bar that the annotation does not claim. In many scenes the notes of the annotation record which case applies. In the five wrong scenes, inspection of the point clouds shows that every detection without a partner is a bar that the other view truncates.
+
+To explain the failure in these scenes, the output of the method and the annotated correspondence are both scored with the objective of \cref{sec:ambiguity-transport} on every detection of the scene, leaving unpaired each detection that the annotation does not pair. In all five scenes the wrong output costs less than the annotated correspondence so the failure comes from what the objective can distinguish and not from the search that minimises it.
+
+The five scenes split into two groups. In the first group, consisting of two scenes, each view contains at least one bar that the other does not see. The annotation thus leaves unpaired detections on both sides, whereas the shift associates more of them and costs 6.6 to 7.4 cost units less than the annotated correspondence. In the second group, consisting of the other three scenes, the shift associates the same number of detections as the ground truth. Here the counting term is the same for both associations so the difference comes from geometry alone, which favours the shift by only 0.02 to 0.60 cost units. The same behaviour occurs in synthetic scenes at the edge of the scan window (\cref{sec:ambiguity-truncation}). In those scenes truncation cuts a bar in one view but not in the other, so even the true correspondence leaves an unpaired detection, the count advantage vanishes and the margin depends solely on geometry.
+
+Consequently, these errors cannot be eliminated with a better search because in these scenes the objective already favours the wrong association. The analysis, however, identifies a clear risk condition, since the hybrid method fails completely on a scene only when at least one detection lacks an annotated partner.
+
 
 
 %------------------------------------------%
