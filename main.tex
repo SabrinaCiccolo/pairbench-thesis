@@ -765,6 +765,45 @@ In two scenes, however, an alternative costs less than the true correspondence, 
 
 The comparison with \cref{sec:ambiguity-length} suggests one further question: whether scenes with a larger implied length change also have a larger margin. Over the scenes whose cheapest alternative belongs to the shift family, the rank correlation between $\Delta\ell$ and the margin is weakly positive (Spearman's $\rho = 0.25$). This does not show that the length cue is at work, since the objective has no length term. Both quantities depend on the pitch because $\Delta\ell$ grows with it by construction and a wider pitch also separates the bars in the distance term that the objective does contain. The correlation therefore reflects this common factor rather than an effect of length. The metric cue around which the original system was designed is therefore absent from the objective that decides the association, while \cref{sec:ambiguity-length} shows that it could not resolve the error even if it were present.
 
+\chapter{Evaluation of the pairing methods}
+\label{ch:evaluation}
+
+The pairing methods of \cref{sec:setting-pairing} are evaluated on the 108 real scenes with the metrics of \cref{sec:setting-dataset}.
+
+All results refer to the candidate-pool detector (\cref{sec:setting-detection}), except where \cref{sec:eval-accuracy,sec:eval-detector} use the two-pass suppression detector. The order-based anchor with the original length check is excluded from all comparisons. Under the offline calibration, the X-axis bias of about $-$1077~mm (\cref{sec:identify-recovery}) makes the $\pm$10~mm length check fail on every candidate pair so the method yields no pairs. After self-calibration its counting F1 returns to 0.917 (\cref{sec:identify-metric}), which shows that the missing pairs come from the calibration error rather than from the method itself. In its place, the comparisons use the three variants defined in \cref{sec:setting-pairing}: one without the length check, one with the check re-centred on the estimated error (the debiased check) and one that keeps the order of the detections without applying any check.
+
+\section{Counting and correspondence metrics on the same detections}
+\label{sec:eval-counting}
+
+The simplest way to evaluate a pairing stage is to compare the number of pairs produced by a method with the number expected from the count annotation. This metric needs no correspondence annotation but cannot tell a correct pair from a swapped or shifted one (\cref{sec:setting-dataset}). \Cref{tab:eval-metrics} reports both metrics for each method on the same detections across the 108 scenes, along with the inversion count at the same stacking level and the IPAA-1.0 (i.e., the fraction of scenes with entirely correct pairing).
+
+\begin{table}[htbp]
+\centering
+\caption[Counting and correspondence metrics of the pairing methods]{Counting and correspondence metrics of the pairing methods. All methods pair the detections of the candidate-pool detector on the 108 real scenes. Counting precision (P), recall (R) and F1 compare the number of pairs with the count annotation and the 95\% interval of counting F1 comes from a bootstrap over bundles. Inversions count side-by-side pairs at the same stacking level whose Y-order is inverted between the two views, correspondence recall is the fraction of resolved claims reproduced with the correct bar identity and IPAA-1.0 is the fraction of scenes paired entirely correctly.}
+\label{tab:eval-metrics}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{@{}p{2.9cm}rrrrrrr@{}}
+\toprule
+method & \begin{tabular}[b]{@{}c@{}}counting\\P\end{tabular} & \begin{tabular}[b]{@{}c@{}}counting\\R\end{tabular} & \begin{tabular}[b]{@{}c@{}}counting\\F1\end{tabular} & \begin{tabular}[b]{@{}c@{}}F1\\95\% CI\end{tabular} & inversions & \begin{tabular}[b]{@{}c@{}}correspondence\\recall\end{tabular} & IPAA-1.0 \\
+\midrule
+\raggedright order-based anchor, debiased check & 1.000 & 0.847 & 0.917 & [0.891, 0.941] & 0 & 0.816 & 0.731 \\
+\raggedright order-based anchor, no length check & 0.997 & 0.876 & 0.933 & [0.909, 0.954] & 0 & 0.835 & 0.741 \\
+\raggedright order-based anchor, no checks & 0.995 & 0.948 & 0.971 & [0.958, 0.984] & 0 & 0.872 & 0.843 \\
+\raggedright free assignment & 0.995 & 0.953 & 0.973 & [0.961, 0.985] & 59 & 0.762 & 0.676 \\
+\raggedright aligned assignment & 0.995 & 0.953 & 0.973 & [0.961, 0.985] & 40 & 0.779 & 0.741 \\
+\raggedright monotonic alignment & 0.998 & 0.928 & 0.961 & [0.940, 0.979] & 0 & 0.865 & 0.796 \\
+\raggedright hybrid method & 0.995 & 0.955 & 0.975 & [0.961, 0.987] & 0 & 0.929 & 0.889 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The counting metric discriminates poorly between methods, since thirteen of the twenty-one pairs of methods have overlapping 95\% intervals on counting F1. It separates the two order-based anchors that retain a check from all other methods, with the exception of monotonic alignment, but fails to rank the remaining five methods among themselves.
+
+When the counting metric does distinguish two methods, correspondence recall does not always confirm the ranking. While it confirms the ordering for the hybrid method and the check-free anchor, the two anchors with checks yield a lower counting F1 (0.917 and 0.933 against 0.973) yet achieve higher correspondence recall (0.816 and 0.835 against 0.762 and 0.779) compared to free and aligned assignment. A paired bootstrap on the bundles reveals no significant differences between these recall values. The correspondence annotation therefore does not show that the anchors pair better than free or aligned assignment. It shows instead that the gap in counting F1 does not reflect a real difference in pairing accuracy. Free assignment shows why, since it reaches almost the highest counting F1 with the lowest correspondence recall. It pairs faces without any order constraint, so 59 of its pairs are same-level inversions that give the expected number of pairs with the wrong identities.
+
+This is an instance of the discrepancy recently described for multi-view association \citev{shelukhan2026}, where a better score on a proxy metric does not necessarily mean a better assignment.
+
 
 
 %------------------------------------------%
