@@ -253,6 +253,8 @@ This shift ambiguity is illustrated in \cref{fig:aliasing}. In each view, a diff
 \label{fig:aliasing}
 \end{figure}
 
+\newpage
+
 This condition is not an edge case because in many scenes of the dataset some bars are scanned at only one end. The objective is to determine what portion of the correspondence is actually recoverable and to define how unpaired detections are handled.
 
 The scans used in this thesis were provided by beanTech, the company that developed the vision software of the rig for the manufacturer that operates it. At the time of this work the rig was still being commissioned and only a limited number of scenes was available. This setting favours methods that require no training data, such as the classical detector and the pairing methods studied here, since the detector needs only the drawing of the bar cross-section.
@@ -422,7 +424,7 @@ The results of the learned model depend on how the data is split. In the scene-d
 
 The discrepancy between the two splits shows that the model learns the four cross-sections present in the dataset, but does not develop a general end-face detector. Given a DXF drawing, the classical detector requires no training data and therefore always operates in the family-disjoint regime. The price is inference time, which is 2.53~s per scene side against 18 to 24~ms for the learned model.
 The two F1 values are lower bounds, because training was stopped before the test F1 had converged under a CPU-only schedule. The qualitative conclusion does not depend on them, since the model does not generalise to an unseen cross-section.
-
+\newpage
 \section{The association task and the methods compared}
 \label{sec:setting-pairing}
 
@@ -439,12 +441,14 @@ The faces detected in a view are grouped into stacking levels, i.e., the horizon
 
 The task is a partial association between the detections in the two views. Each detection includes a YZ centroid, a coarse matching angle, the estimated face normal and the stacking level to which it belongs. Given the detections $D_1 = \{d_1,\dots,d_m\}$ and $D_2 = \{e_1,\dots,e_n\}$ of the two sides, an association is a partial matching $\pi \subseteq D_1 \times D_2$ in which each detection appears at most once. Unpaired detections are allowed and, in this dataset, necessary because 49 faces have no counterpart.
 
+
 All association methods compared in this thesis share a single cost model:
 
 \begin{equation}
 c(i,j) = \frac{|\Delta\theta(i,j)|}{\tau_\theta} + \min\!\left(\frac{\|\Delta_{YZ}(i,j)\|}{\tau_d},\ \kappa\right) + \lambda_L\,|\mathrm{level}(i) - \mathrm{level}(j)| + \lambda_Z\,[\mathrm{outlier}(i) \neq \mathrm{outlier}(j)]
 \label{eq:cost}
 \end{equation}
+\newpage
 
 The cost consists of four terms. The first term, $\Delta\theta$, measures the orientation difference between the two faces. The cross-section can be symmetric, so two orientations differing by a full period are considered equal: 90$^\circ$ for a square section, 180$^\circ$ for a rectangular section and 360$^\circ$ for an asymmetric section. The period is measured from the section contour and is not declared per family, in line with symmetry handling in BOP 6D benchmarks \citev{hodan2020}.
 \Cref{fig:sections} shows the four cross-sections with their corresponding measured periods.
@@ -529,7 +533,7 @@ Let $s_1$ and $s_2$ denote the positions of the two carriages along their respec
 r_k(s_1, s_2) = \left\Vert{} w_1^k(s_1) - \left( w_2^k(s_2) + (0, 0, t_z) \right) \right\Vert{} - L
 \label{eq:residual}
 \end{equation}
-
+\newpage
 The estimation of $s_1$ and $s_2$ minimises the median of the absolute value of the residuals:
 
 \begin{equation}
@@ -566,7 +570,7 @@ The same matrix also shows that no scene is geometrically more favourable than t
 \caption[Unobservable direction of the length prior]{Unobservable direction of the length prior. Contour lines of the quadratic form in the two carriage positions $s_1$ and $s_2$, plotted starting from the two eigenvalues and the eigenvector reported by the observability analysis. The cost grows rapidly along the $s_1 - s_2$ direction (the observed one), while remaining flat along the orthogonal direction in which the two carriages slide together. With a curvature ratio of $6.90 \times 10^{7}$, the curves extend without bound in the flat direction. The width of the plotted strip is an empirical dispersion level, 3.4~mm at real scale, magnified 22 times to render it visible. The dashed line marks the lowest knot of the calibration interval, i.e., the boundary at which a search along the flat direction stops.}
 \label{fig:nullspace}
 \end{figure}
-
+\newpage
 \section{Recovering the carriage separation}
 \label{sec:identify-recovery}
 
@@ -619,7 +623,7 @@ Regarding uncertainty, the quantity to quote is the reproducibility across scene
 \end{figure}
 
 The dispersion across scenes indicates matching quality rather than calibration quality. The outliers comprise one scene with two pairs at one extreme (5378.2~mm) and one with four pairs at the other (5421.2~mm). A scene whose pairs are wrong will estimate whatever separation makes those pairs consistent, regardless of how many it contains.
-
+\newpage
 \section{Calibration in Z, transport in Y}
 \label{sec:identify-ztransport}
 
@@ -919,7 +923,7 @@ method & $\Delta$ & \begin{tabular}[b]{@{}c@{}}95\%\\paired CI\end{tabular} & \b
 Only the two order-based anchors that keep the checks of the original system change substantially, both losing roughly 0.50 in recall, which is more than half of their performance. In contrast, all other methods change by less than 0.10, with the 95\% interval for $\Delta$ containing zero for every method except free assignment. The anchor without checks belongs to this second group even though it pairs the detections in exactly the same order as the anchor without the length check. The two differ only in the torsion and tilt checks, which compare the matching angle and the face normal of the two ends of a candidate pair. The loss of the installed heuristic under a change of detector therefore comes from these checks, whose inputs depend on how each detector estimates angles and normals, rather than from order-based pairing itself. The performance difference between the two anchors ($+$0.502, CI [$+$0.418, $+$0.579]) survives the Holm--Bonferroni correction alongside those of the four cost-model methods.
 
 One caveat concerns the size of the effect but not its direction. Since the anchors were placed on the output of the candidate-pool detector, claims are re-linked to the two-pass suppression detector with a median error of 0.96~mm and fewer of them are resolved (\cref{sec:setting-dataset}). This affects every method in the same way, which is why the comparison measures how much each method changes rather than which detector is more accurate. Moreover, the re-linking error cannot plausibly explain a recall drop of 0.50 that appears only in the methods with acceptance checks.
-
+\newpage
 \section{Comparison with the original system's pairing criterion}
 \label{sec:eval-original}
 
@@ -953,7 +957,7 @@ The approach establishes what the data can determine, recovers this part and mea
 \textbf{The hybrid method and the installed heuristic.} The heuristic installed in the original system pairs the faces of each stacking level based on their order and accepts a pair only if it passes checks on torsion, length and tilt (\cref{sec:setting-pairing}). The hybrid method significantly outperforms it, raising correspondence recall from 0.835 to 0.929 and reducing the scenes on which pairing fails completely from 14 to 5. The advantage grows with the other detector, since under two-pass suppression the recall of the installed heuristic drops to 0.317 whereas the hybrid method remains at 0.911. This collapse stems from the checks on angles and normals, as the same order-based pairing without checks remains stable. Based on the data and setup available in this work, even the pairing criterion of the original system, reproduced with its replay tool, performs worse than all the evaluated methods.
 
 \textbf{Order as a baseline.} The order-based anchor without checks constitutes a strong baseline for this dataset. The hybrid method achieves a higher recall (0.929 against 0.872) and fails completely in fewer than half as many scenes (5 against 13). On the 96 independent bundles in the dataset (\cref{sec:setting-dataset}), however, the difference in recall is not statistically significant because the hybrid method's advantage stems entirely from the six scenes in which it accepts the crossing hypothesis (\cref{sec:setting-pairing}) and on which the order-based anchor without checks pairs no bar correctly. In the remaining scenes, the two methods perform equivalently (\cref{sec:eval-accuracy}).
-
+\newpage
 \textbf{A reusable evaluation.} The evaluation procedure developed in this thesis can be reused because the correspondence annotation is anchored to physical positions in the scene and can therefore score the output of any detector. Confidence intervals are computed by resampling whole bundles because errors occur one scene at a time and are not independent within a scene. The synthetic twin also makes it possible to vary pitch regularity, transport and view truncation independently on scenes where the identity of each bar is known by construction. Finally, every numerical value reported in this thesis is traceable to a stored result and those obtained on synthetic data can be reproduced from public data (\cref{sec:concl-limitations}).
 
 \section{Limitations}
