@@ -837,6 +837,39 @@ The five scenes split into two groups. In the first group, consisting of two sce
 
 Consequently, these errors cannot be eliminated with a better search because in these scenes the objective already favours the wrong association. The analysis, however, identifies a clear risk condition, since the hybrid method fails completely on a scene only when at least one detection lacks an annotated partner.
 
+\section{Correspondence accuracy of the pairing methods}
+\label{sec:eval-accuracy}
+
+To determine whether differences in correspondence recall exceed sampling variation, each method is compared with the hybrid method by a paired bootstrap over the 96 bundles formed by the 108 scenes (\cref{sec:setting-dataset}). Each of the 10{,}000 replicates draws a set of bundles with replacement and evaluates all methods on that identical set. Consequently, variation due to scene selection cancels out when taking the difference between two methods.
+
+\begin{table}[htbp]
+\centering
+\caption[Correspondence recall compared with the hybrid method]{Correspondence recall compared with the hybrid method. Correspondence recall of each pairing method on the 108 real scenes with the candidate-pool detector and its difference $\Delta$ from the hybrid method, whose recall is 0.929. The 95\% interval and $p$ come from a paired bootstrap with 10{,}000 replicates over the 96 bundles, in which every replicate evaluates all methods on the same resampled bundles.}
+\label{tab:eval-accuracy}
+\begin{tabular}{@{}p{2.9cm}rrrr@{}}
+\toprule
+method & \begin{tabular}[b]{@{}c@{}}correspondence\\recall\end{tabular} & \begin{tabular}[b]{@{}c@{}}$\Delta$ vs\\hybrid\end{tabular} & \begin{tabular}[b]{@{}c@{}}95\%\\paired CI\end{tabular} & $p$ \\
+\midrule
+\raggedright order-based anchor, no checks & 0.872 & $-$0.057 & [$-$0.133, $+$0.016] & 0.13 \\
+\raggedright monotonic alignment & 0.865 & $-$0.064 & [$-$0.127, $-$0.018] & $<$0.001 \\
+\raggedright order-based anchor, no length check & 0.835 & $-$0.093 & [$-$0.172, $-$0.016] & 0.02 \\
+\raggedright order-based anchor, debiased check & 0.816 & $-$0.113 & [$-$0.192, $-$0.034] & 0.007 \\
+\raggedright aligned assignment & 0.779 & $-$0.150 & [$-$0.259, $-$0.065] & $<$0.001 \\
+\raggedright free assignment & 0.762 & $-$0.167 & [$-$0.270, $-$0.067] & 0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The hybrid method achieves the highest correspondence recall (\cref{tab:eval-accuracy}) and differs significantly from five of the six competing methods. Since this conclusion rests on six tests at once, the comparisons are corrected with the Holm--Bonferroni procedure \citev{holm1979}, which keeps the probability of even one false separation at 5\% or less and remains valid when the tests are dependent, as they are here because they share the same bootstrap replicates. All five comparisons whose confidence intervals exclude zero survive this correction. The same pattern holds for IPAA-1.0, where the gap compared to monotonic alignment is $-$0.093 with a 95\% interval of [$-$0.153, $-$0.043].
+
+The sole exception is the order-based anchor without checks, which associates detections within each stacking level based strictly on order. Its recall is 0.057 lower but the confidence interval for the difference includes zero. Similarly, on IPAA-1.0, the gap ($-$0.046 with interval [$-$0.123, $+$0.028]) is not statistically significant. Switching to the two-pass suppression detector gives the same picture, since the hybrid method again leads in recall (0.911) and differs significantly from all methods except this anchor (0.856, difference of $-$0.055, interval [$-$0.124, $+$0.003]). Given this sample size, ordering alone serves as a baseline that none of the more elaborate methods significantly outperform. However, the order-based anchor without checks fails completely on more than twice as many scenes as the hybrid method (13 versus 5 among those with at least two claims, \cref{sec:eval-errors}).
+
+The gap between the two methods comes from a small and specific set of scenes. On the 64 scenes in which both views report the same number of detections and the crossing hypothesis (\cref{sec:setting-pairing}) is not accepted, the two methods associate the same number of claims correctly. Where the numbers of detections differ, the hybrid method does better on 7 scenes and worse on 6 and gains 17 claims while losing 18, which gives neither method a real advantage. The hybrid method gains 24 claims on the 6 scenes in which the crossing hypothesis is accepted and the order-based anchor without checks associates no claim correctly. These scenes therefore account for the whole difference of 23 claims (378 against 355) and are also among the 13 on which the anchor fails completely.
+
+The hybrid method applies monotonic alignment within each stacking level while incorporating the crossing hypothesis (\cref{sec:setting-pairing}). Its advantage over monotonic alignment stems from structural configurations that a single ordered association across the entire bundle cannot represent, namely bundles with several stacking levels, including those whose top bar is recognised as a separate level in one view only, and bars lying across the bundle, whether raised in both views or at one end only. The hybrid method never scores lower than monotonic alignment on any scene and scores higher only on scenes of these kinds.
+
+The crossing hypothesis is accepted in 9 of the 108 real scenes. Two synthetic suites isolate this mechanism under controlled conditions. In the first suite, the crossing bar is raised along its entire length and the hybrid method correctly associates every bar in every cell. Free and aligned assignment, which lack the crossing hypothesis, achieve the same result, so this suite confirms that the hypothesis triggers when expected without showing a gain in accuracy. In the second suite, one end of the bar rests on the bundle while the other extends onto the bed beyond the bundle, as in the real scenes discussed in \cref{sec:ambiguity-real}. Here, the hybrid method again correctly associates every bar in every cell, whereas every competing method fails in at least half of the cells.
+
 
 
 %------------------------------------------%
