@@ -171,6 +171,19 @@ Sabrina Ciccolo\\
 %------------------------------------------%
 
 \frontmatter
+\chapter{Abstract}
+
+A robot that picks long metal bars from a conveyor belt must first locate them. In the industrial rig studied here, the bars form a bundle with a 3D scanner at each end, so locating a bar requires pairing the end faces seen by one scanner with those seen by the other but the two views share no surface and the bars are identical and almost evenly spaced. In addition, the scan window of each scanner is often narrower than the bundle, which moves between the two acquisitions, so one view can contain bars that the other does not see.
+
+Existing methods for cross-view association rely on surfaces visible in both views or on objects that differ in appearance and do not appear suited to this case. Besides the accuracy of pairing methods, this thesis therefore studies which part of the correspondence the data can determine and how much ambiguity remains, combining an identifiability analysis, a synthetic twin of the rig and 108 real scenes.
+
+Several pairing methods minimise a cost made of a geometric term, which measures how poorly the paired end faces align, and a counting term, which penalises every detection left unpaired. When the bars are almost evenly spaced, an association shifted by one bar has practically the same geometric term as the true correspondence and only the counting term tells the two apart, although this term is no longer enough if the two views contain partly different bars because the true correspondence then also leaves some detections unpaired.
+
+This mechanism is the central result of the thesis. On real data, the most accurate method recovers 92.9\% of the annotated correspondences but in every scene on which it fails completely, which always contains at least one detection without an annotated partner, it returns a shifted association that costs less than the true correspondence. The error therefore lies in the cost itself and not in how its minimum is found. Eliminating it would require information that distinguishes individual bars.
+
+From the scans it is also possible to recover the separation between the two scanners along the bar axis but not their absolute position, which does not change the reconstructed bar length. Estimating the separation therefore removes the systematic error of about one metre that the offline calibration available to this work leaves in the reconstructed length. Finally, a shifted association forms almost as many pairs as the true correspondence but is wrong on every bar, so the thesis proposes an evaluation that checks whether the two end faces of each bar have been paired with each other.
+
+
 \clearpage
 \null
 \clearpage
