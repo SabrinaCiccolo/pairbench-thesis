@@ -870,6 +870,50 @@ The hybrid method applies monotonic alignment within each stacking level while i
 
 The crossing hypothesis is accepted in 9 of the 108 real scenes. Two synthetic suites isolate this mechanism under controlled conditions. In the first suite, the crossing bar is raised along its entire length and the hybrid method correctly associates every bar in every cell. Free and aligned assignment, which lack the crossing hypothesis, achieve the same result, so this suite confirms that the hypothesis triggers when expected without showing a gain in accuracy. In the second suite, one end of the bar rests on the bundle while the other extends onto the bed beyond the bundle, as in the real scenes discussed in \cref{sec:ambiguity-real}. Here, the hybrid method again correctly associates every bar in every cell, whereas every competing method fails in at least half of the cells.
 
+\section{Stability under a change of detector}
+\label{sec:eval-detector}
+
+The comparison of \cref{sec:eval-accuracy} uses a single detector (the candidate-pool detector) at its standard operating thresholds and does not show whether the methods remain robust when the detector changes. The test is possible because claims are anchored to YZ points rather than to detection indices (\cref{sec:setting-dataset}) so the same ground truth scores both detectors. Holding the ground truth and scenes fixed, the candidate-pool detector is replaced with the two-pass suppression detector (\cref{sec:setting-detection}) to measure the resulting change in recall for each method.
+
+The comparison uses the 108 scenes in which both detectors resolve at least one claim, evaluating confirmed detections exclusively. In \cref{tab:eval-detector}, $\Delta$ represents the correspondence recall under the candidate-pool detector minus that under the two-pass suppression detector. The final column compares each method against the order-based anchor without a length check, the variant selected in \cref{sec:setting-pairing} to represent the installed heuristic. This column reports $\vert{}\Delta(\text{anchor})\vert{} - \vert{}\Delta(\text{method})\vert{}$, which yields a positive value when a method exhibits greater stability (i.e., smaller change) than the anchor. Both confidence intervals are derived from a paired bootstrap over the bundles. \Cref{fig:detector-transfer} shows the recall of each method under the two detectors.
+
+\begin{table}[htbp]
+\centering
+\caption[Stability of correspondence recall under a change of detector]{Stability of correspondence recall under a change of detector. $\Delta$ is the correspondence recall with the candidate-pool detector minus that with the two-pass suppression detector, on the 108 scenes in which both detectors resolve at least one claim and with the same ground truth. The difference from the anchor is $\vert\Delta(\text{anchor})\vert - \vert\Delta(\text{method})\vert$, where the anchor is the order-based anchor without a length check, so a positive value means that the method changes less than the anchor. Both 95\% intervals come from a paired bootstrap over bundles.}
+\label{tab:eval-detector}
+\begin{tabular}{@{}p{2.9cm}rrrr@{}}
+\toprule
+method & $\Delta$ & \begin{tabular}[b]{@{}c@{}}95\%\\paired CI\end{tabular} & \begin{tabular}[b]{@{}c@{}}difference from\\the anchor\end{tabular} & \begin{tabular}[b]{@{}c@{}}95\%\\paired CI\end{tabular} \\
+\midrule
+\raggedright monotonic alignment & $+$0.004 & [$-$0.058, $+$0.065] & $+$0.515 & [$+$0.406, $+$0.577] \\
+\raggedright order-based anchor, no checks & $+$0.016 & [$-$0.021, $+$0.053] & $+$0.502 & [$+$0.418, $+$0.579] \\
+\raggedright hybrid method & $+$0.018 & [$-$0.049, $+$0.082] & $+$0.501 & [$+$0.397, $+$0.576] \\
+\raggedright aligned assignment & $-$0.022 & [$-$0.108, $+$0.063] & $+$0.496 & [$+$0.374, $+$0.574] \\
+\raggedright free assignment & $+$0.068 & [$+$0.017, $+$0.122] & $+$0.451 & [$+$0.353, $+$0.553] \\
+\raggedright order-based anchor, debiased check & $+$0.507 & [$+$0.431, $+$0.583] & $+$0.012 & [$-$0.011, $+$0.037] \\
+\raggedright order-based anchor, no length check & $+$0.519 & [$+$0.439, $+$0.597] & reference & \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\textwidth]{fig/n6_detector_transfer.png}
+\caption[Effect of a change of detector]{Effect of a change of detector. Correspondence recall for each method across the two detectors using identical ground truth and scene sets. Colours distinguish four methodological groups: methods using the shared cost model with a per-scene translation estimate, free assignment (which employs the cost model without a translation estimate), the two order-based anchors retaining acceptance checks from the original system and the check-free order-based anchor. Dashed lines with open markers serve solely to resolve visually overlapping trajectories. Only the two anchors with acceptance checks lose most of their recall, whereas the order-based anchor without checks remains as stable as the cost-model methods.}
+\label{fig:detector-transfer}
+\end{figure}
+
+Only the two order-based anchors that keep the checks of the original system change substantially, both losing roughly 0.50 in recall, which is more than half of their performance. In contrast, all other methods change by less than 0.10, with the 95\% interval for $\Delta$ containing zero for every method except free assignment. The anchor without checks belongs to this second group even though it pairs the detections in exactly the same order as the anchor without the length check. The two differ only in the torsion and tilt checks, which compare the matching angle and the face normal of the two ends of a candidate pair. The loss of the installed heuristic under a change of detector therefore comes from these checks, whose inputs depend on how each detector estimates angles and normals, rather than from order-based pairing itself. The performance difference between the two anchors ($+$0.502, CI [$+$0.418, $+$0.579]) survives the Holm--Bonferroni correction alongside those of the four cost-model methods.
+
+One caveat concerns the size of the effect but not its direction. Since the anchors were placed on the output of the candidate-pool detector, claims are re-linked to the two-pass suppression detector with a median error of 0.96~mm and fewer of them are resolved (\cref{sec:setting-dataset}). This affects every method in the same way, which is why the comparison measures how much each method changes rather than which detector is more accurate. Moreover, the re-linking error cannot plausibly explain a recall drop of 0.50 that appears only in the methods with acceptance checks.
+
+\section{Comparison with the original system's pairing criterion}
+\label{sec:eval-original}
+
+To contextualise these findings, the same 108 scenes were reprocessed using the replay tool of the original system, comparing its association decisions against the correspondence annotations. Reprocessing was conducted using offline calibration, the default carriage position of the original system (2701~mm per side, \cref{sec:identify-recovery}) and a length tolerance of 2000~mm, the value configured on a machine in service. Across 407 claims in the 108 scenes, the replay tool achieves a correspondence recall of 0.531 and a precision of 0.818. This recall is below that of every method evaluated in this chapter, since even free assignment, the weakest of them, reaches 0.762 on the same claims.
+
+Although these parameters were chosen in this work, they do not affect face detection, which takes place in the YZ projection, where the tool finds almost all faces (precision 0.996, recall 0.898). Correspondence recall is therefore lost in the pairing decision, which compares the 3D distance between centroids with the expected bar length. Since this distance depends mainly on the X coordinate, along which the offline calibration introduces an error (\cref{sec:setting-geometry}), this error is probably the main reason for the lower recall.
+
 
 
 %------------------------------------------%
