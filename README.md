@@ -11,6 +11,7 @@ The code, the experiments and the results behind the thesis are in [pairbench](h
 
 - `main.pdf`: the compiled thesis
 - `main.tex`, `bibThesis.bib`, `fig/`: the LaTeX source
+- `presentation/discussion.pptx`: the slides of the thesis defence
 
 ## Building
 
